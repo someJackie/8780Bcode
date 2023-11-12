@@ -159,6 +159,7 @@ void disabled() {}
 void competition_initialize() {}
 
 ASSET(sameColor_txt);
+ASSET(oppositeColor_txt);
 
 /**
  * Runs the user autonomous code. This function will be started in its own task
@@ -199,7 +200,7 @@ void autonomous() {
 		chassis.follow(sameColor_txt,2000,15,true);
 	}
 	if (sameColor==0){//opposite side auton
-		
+		chassis.follow(oppositeColor_txt,2000,15,true);
 	}
 	if (sameColor==2){//forgot to choose auton just rams triball into net
 		leftMiddle.move(100);
@@ -223,7 +224,6 @@ void autonomous() {
 		rightUp.move(-100);
 		rightMiddle.move(-100);
 		pros::delay(1000);
-
 	}
 	
 }
