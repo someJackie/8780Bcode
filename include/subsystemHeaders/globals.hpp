@@ -14,6 +14,8 @@ extern pros::Motor_Group rightSide;
 extern pros::Motor sling1;
 extern pros::Motor sling2;
 
+//Other stuff
 extern pros::Controller controller;
 
 extern pros::ADIDigitalIn limiter;
+extern pros::ADIDigitalOut piston;

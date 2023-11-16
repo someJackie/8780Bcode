@@ -11,11 +11,10 @@ pros::Motor rightDown(7,pros::E_MOTOR_GEAR_200,false,pros::E_MOTOR_ENCODER_DEGRE
 pros::Motor_Group leftSide({leftUp,leftMiddle,leftDown});
 pros::Motor_Group rightSide({rightUp,rightMiddle,rightDown});
 
-
-
 pros::Motor sling1(11,pros::E_MOTOR_GEAR_100,false,pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor sling2(20,pros::E_MOTOR_GEAR_100,false,pros::E_MOTOR_ENCODER_DEGREES);
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
-pros::ADIDigitalIn limiter('h');
+pros::ADIDigitalIn limiter('H');
+pros::ADIDigitalOut piston('A');

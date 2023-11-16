@@ -9,6 +9,7 @@ lemlib::Drivetrain_t drivetrain {
 	10.75, //track length
 	3.25, // wheel diameter
 	333, //wheel rpm
+	2 //chase power
 
 };
 //sensors
@@ -21,8 +22,8 @@ lemlib::OdomSensors_t sensors{
 };
 //forward/backward PID
 lemlib::ChassisController_t lateralController{
-	8, //kP
-	30, //kD
+	6, //kP
+	75, //kD
 	1, //smallErrorRange
 	100, //smallErrorTimeout
 	3, //largeErrorRange
@@ -123,6 +124,7 @@ void initialize() {
 	sling2.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
 
 	chassis.calibrate();
+	chassis.setPose(0,0,0);
 	pros::Task screenTask(screen);
 }
 
@@ -193,9 +195,18 @@ void autonomous() {
 	leftMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 	rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 
-	//turnTo(x,y,timeout,should back of robot face point,max speed) turns to face a point
-	//moveTo(x,y,timeout,max speed) moves to a point
+	//chassis.turnTo(x,y,timeout,should back of robot face point,max speed) turns to face a point
+	//chassis.moveTo(x,y,heading,timeout,asyncronous?) moves to a point
+	//chassis.waitUntilDist(num) wait until robot has traved num distance
 	//chassis.follow(path.txt,timeout,look ahead distance, backwards?)
+
+
+	chassis.moveTo(0,10,0,2000); //tuning
+
+	//uncomment line below to test pure pursuit 
+	//chassis.follow(sameColor_txt,2000,15,true);
+
+	/*
 	if (sameColor==1){//same side auton
 		chassis.follow(sameColor_txt,2000,15,true);
 	}
@@ -225,6 +236,7 @@ void autonomous() {
 		rightMiddle.move(-100);
 		pros::delay(1000);
 	}
+	*/
 	
 }
 
@@ -253,6 +265,15 @@ void opcontrol() {
 		int forward = controller.get_analog(ANALOG_LEFT_X);
 		int turn = controller.get_analog(ANALOG_LEFT_Y);
 
+		if (forward+turn!=0){
+			leftUp.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			leftDown.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			rightUp.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			rightDown.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			leftMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+		}
+
 		if (controller.get_digital(DIGITAL_L2)==true){
 			speedMod = .3; // Speed at 30%
 		}
@@ -274,19 +295,34 @@ void opcontrol() {
 		//slingshot
 		if (controller.get_digital(DIGITAL_R1)==true){
 			sling1.move(127);
-			sling2.move(127);
-		}
-		//intake
-		if (controller.get_digital(DIGITAL_R2)==true){
-			sling1.move(-127);
 			sling2.move(-127);
 		}
+		//intake
+		if (controller.get_digital(DIGITAL_A)==true){
+			sling1.move(-127);
+			sling2.move(127);
+		}
 		//turn off
-		if (controller.get_digital(DIGITAL_X)==true){
+		if (controller.get_digital(DIGITAL_B)==true || controller.get_digital(DIGITAL_R2)==true){
 			sling1.move(0);
 			sling2.move(0);
 		}
+		//wheellock
+		if (controller.get_digital(DIGITAL_Y)==true){
+			leftUp.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+			leftDown.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+			rightUp.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+			rightDown.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+			leftMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+			rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+		}
 		
+		if (controller.get_digital(DIGITAL_DOWN)==true){
+			piston.set_value(false);
+		}
+		if (controller.get_digital(DIGITAL_UP)==true){
+			piston.set_value(true);
+		}
 		pros::delay(20);
 	}
 }
