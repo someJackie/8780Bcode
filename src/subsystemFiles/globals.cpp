@@ -17,4 +17,5 @@ pros::Motor sling2(20,pros::E_MOTOR_GEAR_100,false,pros::E_MOTOR_ENCODER_DEGREES
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 
 pros::ADIDigitalIn limiter('H');
-pros::ADIDigitalOut piston('A');
+pros::ADIDigitalOut piston1('A');
+pros::ADIDigitalOut piston2('B');

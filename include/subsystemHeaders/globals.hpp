@@ -18,4 +18,5 @@ extern pros::Motor sling2;
 extern pros::Controller controller;
 
 extern pros::ADIDigitalIn limiter;
-extern pros::ADIDigitalOut piston;
+extern pros::ADIDigitalOut piston1;
+extern pros::ADIDigitalOut piston2;

@@ -257,6 +257,8 @@ void opcontrol() {
 	
 	double speedMod = 1; // Speed Modifer 
 
+	
+
 	while (true) {
 	
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
@@ -318,10 +320,12 @@ void opcontrol() {
 		}
 		
 		if (controller.get_digital(DIGITAL_DOWN)==true){
-			piston.set_value(false);
+			piston1.set_value(false);
+			piston2.set_value(false);
 		}
 		if (controller.get_digital(DIGITAL_UP)==true){
-			piston.set_value(true);
+			piston1.set_value(true);
+			piston2.set_value(true);
 		}
 		pros::delay(20);
 	}
