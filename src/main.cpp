@@ -22,8 +22,8 @@ lemlib::OdomSensors_t sensors{
 };
 //forward/backward PID
 lemlib::ChassisController_t lateralController{
-	6, //kP
-	75, //kD
+	0, //kP
+	0, //kD
 	1, //smallErrorRange
 	100, //smallErrorTimeout
 	3, //largeErrorRange
@@ -175,6 +175,8 @@ ASSET(oppositeColor_txt);
  * from where it left off.
  */
 void autonomous() {
+	chassis.calibrate();
+	chassis.setPose(0,0,0);
 	pros::ADIEncoder leftE ();
 	pros::ADIEncoder rightE ();
 	pros::ADIEncoder bottomE ();
@@ -201,7 +203,7 @@ void autonomous() {
 	//chassis.follow(path.txt,timeout,look ahead distance, backwards?)
 
 
-	chassis.moveTo(0,10,0,2000); //tuning
+	chassis.moveTo(0,20,0,2000,false,false,0,6,50); //tuning
 
 	//uncomment line below to test pure pursuit 
 	//chassis.follow(sameColor_txt,2000,15,true);
@@ -235,6 +237,12 @@ void autonomous() {
 		rightUp.move(-100);
 		rightMiddle.move(-100);
 		pros::delay(1000);
+		leftMiddle.move(0);
+		leftDown.move(0);
+		leftUp.move(0);
+		rightDown.move(0);
+		rightUp.move(0);
+		rightMiddle.move(0);
 	}
 	*/
 	
@@ -256,8 +264,6 @@ void autonomous() {
 void opcontrol() {
 	
 	double speedMod = 1; // Speed Modifer 
-
-	
 
 	while (true) {
 	
@@ -319,11 +325,11 @@ void opcontrol() {
 			rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
 		}
 		
-		if (controller.get_digital(DIGITAL_DOWN)==true){
+		if (controller.get_digital(DIGITAL_UP)==true){
 			piston1.set_value(false);
 			piston2.set_value(false);
 		}
-		if (controller.get_digital(DIGITAL_UP)==true){
+		if (controller.get_digital(DIGITAL_DOWN)==true){
 			piston1.set_value(true);
 			piston2.set_value(true);
 		}
