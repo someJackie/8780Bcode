@@ -10,9 +10,12 @@ pros::Motor rightDown(7,pros::E_MOTOR_GEAR_200,false,pros::E_MOTOR_ENCODER_DEGRE
 
 pros::Motor_Group leftSide({leftUp,leftMiddle,leftDown});
 pros::Motor_Group rightSide({rightUp,rightMiddle,rightDown});
+pros::Motor_Group allMotors({leftUp,leftMiddle,leftDown,rightUp,rightMiddle,rightDown});
 
 pros::Motor sling1(11,pros::E_MOTOR_GEAR_100,false,pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor sling2(20,pros::E_MOTOR_GEAR_100,false,pros::E_MOTOR_ENCODER_DEGREES);
+
+pros::Motor_Group slingShotMotors({sling1,sling2});
 
 pros::Controller controller(pros::E_CONTROLLER_MASTER);
 

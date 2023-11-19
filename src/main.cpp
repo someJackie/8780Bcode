@@ -1,6 +1,7 @@
 #include "main.h"
 #include "autoFunction.h"
 #include "lemlib/api.hpp"
+#include <numeric>
 
 //Lemlib Stuff
 lemlib::Drivetrain_t drivetrain {
@@ -22,7 +23,7 @@ lemlib::OdomSensors_t sensors{
 };
 //forward/backward PID
 lemlib::ChassisController_t lateralController{
-	0, //kP
+	0.1, //kP
 	0, //kD
 	1, //smallErrorRange
 	100, //smallErrorTimeout
@@ -97,6 +98,19 @@ void slingShot(){
 		}
 	}
 
+}
+
+/*Temperature Control*/
+bool motorTemps(pros::Motor_Group motorGroup) {
+		std::vector<double> temps = motorGroup.get_temperatures();
+		double averageTemps = std::reduce(temps.begin(),temps.end(),0.0)/temps.size();
+
+		if (averageTemps>60){
+			return true;
+		}
+		else{
+			return false;
+		}
 }
 
 /**
@@ -264,12 +278,17 @@ void autonomous() {
 void opcontrol() {
 	
 	double speedMod = 1; // Speed Modifer 
+	bool driveOverTemp;
+	bool slingOverTemp;
 
 	while (true) {
 	
 		pros::lcd::print(0, "%d %d %d", (pros::lcd::read_buttons() & LCD_BTN_LEFT) >> 2,
 		                 (pros::lcd::read_buttons() & LCD_BTN_CENTER) >> 1,
 		                 (pros::lcd::read_buttons() & LCD_BTN_RIGHT) >> 0);
+
+		//Temperature Regulation system		
+
 		int forward = controller.get_analog(ANALOG_LEFT_X);
 		int turn = controller.get_analog(ANALOG_LEFT_Y);
 
@@ -292,24 +311,37 @@ void opcontrol() {
 		
 		double leftV = -(forward + turn)*speedMod;
 		double rightV = -(forward - turn)*speedMod;
+		
+		std::vector<double> temps = allMotors.get_temperatures();
+		double averageDriveTemps = std::reduce(temps.begin(),temps.end(),0.0)/temps.size();
 
-		leftMiddle.move(leftV);
-		leftDown.move(leftV);
-		leftUp.move(leftV);
-		rightDown.move(rightV);
-		rightUp.move(rightV);
-		rightMiddle.move(rightV);
+		if (averageDriveTemps>60){
+			leftSide.move(leftV);
+			rightSide.move(rightV);
+		}
+		else{
+			allMotors.move(0);
+		}
 
-		//slingshot
-		if (controller.get_digital(DIGITAL_R1)==true){
-			sling1.move(127);
-			sling2.move(-127);
+		std::vector<double> temps = slingShotMotors.get_temperatures();
+		double averageSlingTemps = std::reduce(temps.begin(),temps.end(),0.0)/temps.size();
+
+		if (averageSlingTemps>60){
+			//slingshot
+			if (controller.get_digital(DIGITAL_R1)==true){
+				sling1.move(127);
+				sling2.move(-127);
+			}
+			//intake
+			if (controller.get_digital(DIGITAL_A)==true){
+				sling1.move(-127);
+				sling2.move(127);
+			}
 		}
-		//intake
-		if (controller.get_digital(DIGITAL_A)==true){
-			sling1.move(-127);
-			sling2.move(127);
+		else{
+			slingShotMotors.move(0);
 		}
+
 		//turn off
 		if (controller.get_digital(DIGITAL_B)==true || controller.get_digital(DIGITAL_R2)==true){
 			sling1.move(0);
