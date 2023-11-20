@@ -19,7 +19,7 @@ void timeStop(double tiempo){
 
 void driveE(double speed, double distance){
     //speed = speed percentage out of 100
-    double degree = (distance/wheelCir)*360;
+    double degree =-(distance/wheelCir)*360;
     double rpm = 2*speed;
     if (speed>100 || speed<0){
         return;
@@ -31,7 +31,7 @@ void driveE(double speed, double distance){
     rightMiddle.move_relative(degree,rpm);
     rightDown.move_relative(degree,rpm);
 
-    while (!(rightDown.get_position() < degree+5) && (rightDown.get_position() > degree-5)){
+    while (!(rightDown.get_position() > degree-5)){
         pros::delay(2);
     }
     timeStop(20);
@@ -56,7 +56,7 @@ void turnE(double speed, double rotate){
     rightMiddle.move_relative(degree,rpm);
     rightDown.move_relative(degree,rpm);
 
-    while (!(rightDown.get_position() < degree+5) && (rightDown.get_position() > degree-5)){
+    while (!((rightDown.get_position() < degree+5) && (rightDown.get_position() > degree-5))){
         pros::delay(2);
     }
     timeStop(20);

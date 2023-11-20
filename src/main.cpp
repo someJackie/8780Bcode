@@ -160,6 +160,7 @@ int sameColor = 2;
  * starts.
  */
 void competition_initialize() {
+	/*
 	while (true){ //auton selector
 		if (controller.get_digital(DIGITAL_LEFT)==true){
 			sameColor = 1;
@@ -172,6 +173,7 @@ void competition_initialize() {
 			pros::delay(50);
 		}
 	}
+	*/
 }
 
 ASSET(sameColor_txt);
@@ -217,7 +219,7 @@ void autonomous() {
 	//chassis.follow(path.txt,timeout,look ahead distance, backwards?)
 
 
-	chassis.moveTo(0,20,0,2000,false,false,0,6,50); //tuning
+	//chassis.moveTo(0,20,0,2000,false,false,0,6,50); //tuning
 
 	//uncomment line below to test pure pursuit 
 	//chassis.follow(sameColor_txt,2000,15,true);
@@ -229,14 +231,23 @@ void autonomous() {
 	if (sameColor==0){//opposite side auton
 		chassis.follow(oppositeColor_txt,2000,15,true);
 	}
-	if (sameColor==2){//forgot to choose auton just rams triball into net
+	*/
+	/*
+	driveE(100,20);
+
+	driveE(100,-20);
+
+	allStop();
+	*/
+	//  Same Color
+	
 		leftMiddle.move(100);
 		leftDown.move(100);
 		leftUp.move(100);
-		rightDown.move(100);
-		rightUp.move(100);
-		rightMiddle.move(100);
-		pros::delay(1500);
+		rightDown.move(-100);
+		rightUp.move(-100);
+		rightMiddle.move(-100);
+		pros::delay(1300);
 		leftMiddle.move(0);
 		leftDown.move(0);
 		leftUp.move(0);
@@ -247,19 +258,44 @@ void autonomous() {
 		leftMiddle.move(-100);
 		leftDown.move(-100);
 		leftUp.move(-100);
-		rightDown.move(-100);
-		rightUp.move(-100);
-		rightMiddle.move(-100);
-		pros::delay(1000);
+		rightDown.move(100);
+		rightUp.move(100);
+		rightMiddle.move(100);
+		pros::delay(500);
 		leftMiddle.move(0);
 		leftDown.move(0);
 		leftUp.move(0);
 		rightDown.move(0);
 		rightUp.move(0);
 		rightMiddle.move(0);
-	}
-	*/
-	
+		
+	//	Opposite Color
+		/*
+		leftMiddle.move(127);
+		leftDown.move(127);
+		leftUp.move(127);
+		rightDown.move(-127);
+		rightUp.move(-127);
+		rightMiddle.move(-127);
+		pros::delay(650);
+		leftMiddle.move(0);
+		leftDown.move(0);
+		leftUp.move(0);
+		rightDown.move(0);
+		rightUp.move(0);
+		rightMiddle.move(0);
+		*/
+	//	Skills Auton
+		/*
+		sling1.move(127);
+		sling2.move(-127);
+		leftMiddle.move(20);
+		leftDown.move(20);
+		leftUp.move(20);
+		rightDown.move(-20);
+		rightUp.move(-20);
+		rightMiddle.move(-20);
+		*/
 }
 
 /**
@@ -312,10 +348,10 @@ void opcontrol() {
 		double leftV = -(forward + turn)*speedMod;
 		double rightV = -(forward - turn)*speedMod;
 		
-		std::vector<double> temps = allMotors.get_temperatures();
-		double averageDriveTemps = std::reduce(temps.begin(),temps.end(),0.0)/temps.size();
+		std::vector<double> dTemps = allMotors.get_temperatures();
+		double averageDriveTemps = std::reduce(dTemps.begin(),dTemps.end(),0.0)/dTemps.size();
 
-		if (averageDriveTemps>60){
+		if (averageDriveTemps<55){
 			leftSide.move(leftV);
 			rightSide.move(rightV);
 		}
@@ -323,10 +359,10 @@ void opcontrol() {
 			allMotors.move(0);
 		}
 
-		std::vector<double> temps = slingShotMotors.get_temperatures();
-		double averageSlingTemps = std::reduce(temps.begin(),temps.end(),0.0)/temps.size();
+		std::vector<double> sTemps = slingShotMotors.get_temperatures();
+		double averageSlingTemps = std::reduce(sTemps.begin(),sTemps.end(),0.0)/sTemps.size();
 
-		if (averageSlingTemps>60){
+		if (averageSlingTemps<55){
 			//slingshot
 			if (controller.get_digital(DIGITAL_R1)==true){
 				sling1.move(127);
