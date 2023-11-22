@@ -206,12 +206,7 @@ void autonomous() {
 	float realTheta;
 	pros::lcd::set_text(1, "Auton");
 
-	leftUp.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	leftDown.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	rightUp.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	rightDown.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	leftMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-	rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+	driveMotors.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 
 	//chassis.turnTo(x,y,timeout,should back of robot face point,max speed) turns to face a point
 	//chassis.moveTo(x,y,heading,timeout,asyncronous?) moves to a point
@@ -232,69 +227,27 @@ void autonomous() {
 		chassis.follow(oppositeColor_txt,2000,15,true);
 	}
 	*/
-	/*
-	driveE(100,20);
 
-	driveE(100,-20);
-
-	allStop();
-	*/
 	//  Same Color
 	
-		leftMiddle.move(100);
-		leftDown.move(100);
-		leftUp.move(100);
-		rightDown.move(-100);
-		rightUp.move(-100);
-		rightMiddle.move(-100);
+		driveMotors.move(-100);
 		pros::delay(1300);
-		leftMiddle.move(0);
-		leftDown.move(0);
-		leftUp.move(0);
-		rightDown.move(0);
-		rightUp.move(0);
-		rightMiddle.move(0);
+		driveMotors.move(0);
 		pros::delay(500);
-		leftMiddle.move(-100);
-		leftDown.move(-100);
-		leftUp.move(-100);
-		rightDown.move(100);
-		rightUp.move(100);
-		rightMiddle.move(100);
+		driveMotors.move(100);
 		pros::delay(500);
-		leftMiddle.move(0);
-		leftDown.move(0);
-		leftUp.move(0);
-		rightDown.move(0);
-		rightUp.move(0);
-		rightMiddle.move(0);
+		driveMotors.move(0);
 		
 	//	Opposite Color
 		/*
-		leftMiddle.move(127);
-		leftDown.move(127);
-		leftUp.move(127);
-		rightDown.move(-127);
-		rightUp.move(-127);
-		rightMiddle.move(-127);
+		driveMotors.move(-100);
 		pros::delay(650);
-		leftMiddle.move(0);
-		leftDown.move(0);
-		leftUp.move(0);
-		rightDown.move(0);
-		rightUp.move(0);
-		rightMiddle.move(0);
+		driveMotors.move(0);
 		*/
 	//	Skills Auton
 		/*
-		sling1.move(127);
-		sling2.move(-127);
-		leftMiddle.move(20);
-		leftDown.move(20);
-		leftUp.move(20);
-		rightDown.move(-20);
-		rightUp.move(-20);
-		rightMiddle.move(-20);
+		slingShotMotors.move(127);
+		driveMotors.move(-20);
 		*/
 }
 
@@ -329,12 +282,7 @@ void opcontrol() {
 		int turn = controller.get_analog(ANALOG_LEFT_Y);
 
 		if (forward+turn!=0){
-			leftUp.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-			leftDown.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-			rightUp.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-			rightDown.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-			leftMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
-			rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_COAST);
+			driveMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
 		}
 
 		if (controller.get_digital(DIGITAL_L2)==true){
@@ -348,7 +296,7 @@ void opcontrol() {
 		double leftV = -(forward + turn)*speedMod;
 		double rightV = -(forward - turn)*speedMod;
 		
-		std::vector<double> dTemps = allMotors.get_temperatures();
+		std::vector<double> dTemps = driveMotors.get_temperatures();
 		double averageDriveTemps = std::reduce(dTemps.begin(),dTemps.end(),0.0)/dTemps.size();
 
 		if (averageDriveTemps<55){
@@ -356,7 +304,7 @@ void opcontrol() {
 			rightSide.move(rightV);
 		}
 		else{
-			allMotors.move(0);
+			driveMotors.move(0);
 		}
 
 		std::vector<double> sTemps = slingShotMotors.get_temperatures();
@@ -365,13 +313,11 @@ void opcontrol() {
 		if (averageSlingTemps<55){
 			//slingshot
 			if (controller.get_digital(DIGITAL_R1)==true){
-				sling1.move(127);
-				sling2.move(-127);
+				slingShotMotors.move(127);
 			}
 			//intake
 			if (controller.get_digital(DIGITAL_A)==true){
-				sling1.move(-127);
-				sling2.move(127);
+				slingShotMotors.move(-127);
 			}
 		}
 		else{
@@ -380,17 +326,11 @@ void opcontrol() {
 
 		//turn off
 		if (controller.get_digital(DIGITAL_B)==true || controller.get_digital(DIGITAL_R2)==true){
-			sling1.move(0);
-			sling2.move(0);
+			slingShotMotors.move(0);
 		}
 		//wheellock
 		if (controller.get_digital(DIGITAL_Y)==true){
-			leftUp.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-			leftDown.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-			rightUp.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-			rightDown.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-			leftMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-			rightMiddle.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+			driveMotors.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
 		}
 		
 		if (controller.get_digital(DIGITAL_UP)==true){

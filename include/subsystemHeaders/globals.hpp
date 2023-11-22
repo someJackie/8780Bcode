@@ -10,7 +10,7 @@ extern pros::Motor rightDown;
 
 extern pros::Motor_Group leftSide;
 extern pros::Motor_Group rightSide;
-extern pros::Motor_Group allMotors;
+extern pros::Motor_Group driveMotors;
 
 extern pros::Motor sling1;
 extern pros::Motor sling2;
