@@ -9,6 +9,9 @@ pros::Motor rightUp(6,pros::E_MOTOR_GEAR_200,false,pros::E_MOTOR_ENCODER_DEGREES
 pros::Motor rightMiddle(8,pros::E_MOTOR_GEAR_200,false,pros::E_MOTOR_ENCODER_DEGREES);
 pros::Motor rightDown(7,pros::E_MOTOR_GEAR_200,false,pros::E_MOTOR_ENCODER_DEGREES);
 
+pros::Motor_Group GleftUp({leftUp});
+pros::Motor_Group GrightUp({rightUp});
+
 pros::Motor_Group leftSide({leftUp,leftMiddle,leftDown});
 pros::Motor_Group rightSide({rightUp,rightMiddle,rightDown});
 pros::Motor_Group driveMotors({leftUp,leftMiddle,leftDown,rightUp,rightMiddle,rightDown});

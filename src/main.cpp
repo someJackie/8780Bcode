@@ -2,9 +2,12 @@
 #include "autoFunction.h"
 #include "lemlib/api.hpp"
 #include <numeric>
+#include "api.h"
+#include "pros/misc.h"
+#include "ARMS/config.h"
 
 //Lemlib Stuff
-lemlib::Drivetrain_t drivetrain {
+lemlib::Drivetrain drivetrain {
     &leftSide,
 	&rightSide,
 	10.75, //track length
@@ -14,7 +17,7 @@ lemlib::Drivetrain_t drivetrain {
 
 };
 //sensors
-lemlib::OdomSensors_t sensors{
+lemlib::OdomSensors sensors{
 	nullptr, //verticle tracking wheel 1
 	nullptr, //verticle tracking wheel 2
 	nullptr, //horizontal tracking wheel 
@@ -22,27 +25,27 @@ lemlib::OdomSensors_t sensors{
 	nullptr //intertial sensor
 };
 //forward/backward PID
-lemlib::ChassisController_t lateralController{
-	0.1, //kP
-	0, //kD
+lemlib::ControllerSettings linearController{
+	10, //kP
+	30, //kD
 	1, //smallErrorRange
 	100, //smallErrorTimeout
 	3, //largeErrorRange
 	500, //largeErrorTimeout
-	5 //slew rate
+	20 //slew rate
 };
 //turning PID
-lemlib::ChassisController_t angularController{
-	4, //kP
-	40, //kD
+lemlib::ControllerSettings angularController{
+	2, //kP
+	10, //kD
 	1, //smallErrorRange
 	100, //smallErrorTimeout
 	3, //largeErrorRange
 	500, //largeErrorTimeout
-	0 //slew rate
+	20 //slew rate
 };
 
-lemlib::Chassis chassis(drivetrain,lateralController,angularController,sensors);
+lemlib::Chassis chassis(drivetrain,linearController,angularController,sensors);
 
 //print lemlib position
 void screen(){
@@ -55,6 +58,14 @@ void screen(){
 	}
 }
 
+void armsScreen(){
+	pros::lcd::set_text(0,"X: " + std::to_string(arms::odom::getPosition().x));
+	pros::lcd::set_text(1,"Y: " + std::to_string(arms::odom::getPosition().y));
+	pros::lcd::set_text(2,"H: " + std::to_string(arms::odom::getHeading()));
+	pros::lcd::set_text(3,"Left: " + std::to_string(arms::odom::getLeftEncoder()));
+	pros::lcd::set_text(4,"Right: " + std::to_string(arms::odom::getRightEncoder()));
+	pros::delay(10);
+}
 
 /**
  * A callback function for LLEMU's center button.
@@ -139,7 +150,9 @@ void initialize() {
 
 	chassis.calibrate();
 	chassis.setPose(0,0,0);
-	pros::Task screenTask(screen);
+	//pros::Task screenTask(screen);
+	pros::Task screenTask(armsScreen);
+	arms::init();
 }
 
 /**
@@ -191,8 +204,7 @@ ASSET(oppositeColor_txt);
  * from where it left off.
  */
 void autonomous() {
-	chassis.calibrate();
-	chassis.setPose(0,0,0);
+
 	pros::ADIEncoder leftE ();
 	pros::ADIEncoder rightE ();
 	pros::ADIEncoder bottomE ();
@@ -206,18 +218,33 @@ void autonomous() {
 	float realTheta;
 	pros::lcd::set_text(1, "Auton");
 
-	driveMotors.set_brake_modes(pros::E_MOTOR_BRAKE_BRAKE);
+	driveMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
+
+	switch(arms::selector::auton){
+		case 1: //red side auton
+
+		break;
+		case 3:
+
+		break;
+
+	}
 
 	//chassis.turnTo(x,y,timeout,should back of robot face point,max speed) turns to face a point
 	//chassis.moveTo(x,y,heading,timeout,asyncronous?) moves to a point
 	//chassis.waitUntilDist(num) wait until robot has traved num distance
 	//chassis.follow(path.txt,timeout,look ahead distance, backwards?)
 
-
-	//chassis.moveTo(0,20,0,2000,false,false,0,6,50); //tuning
+	
+	chassis.calibrate();
+	chassis.setPose(0,0,0);
+	//chassis.turnTo();
+	//chassis.moveTo(0,30,0,20000); //tuning
+	
+	
 
 	//uncomment line below to test pure pursuit 
-	//chassis.follow(sameColor_txt,2000,15,true);
+	//chassis.follow(sameColor_txt,3,15000,true);
 
 	/*
 	if (sameColor==1){//same side auton
@@ -229,7 +256,7 @@ void autonomous() {
 	*/
 
 	//  Same Color
-	
+		/*
 		driveMotors.move(-100);
 		pros::delay(1300);
 		driveMotors.move(0);
@@ -237,7 +264,7 @@ void autonomous() {
 		driveMotors.move(100);
 		pros::delay(500);
 		driveMotors.move(0);
-		
+		*/
 	//	Opposite Color
 		/*
 		driveMotors.move(-100);
@@ -278,8 +305,8 @@ void opcontrol() {
 
 		//Temperature Regulation system		
 
-		int forward = controller.get_analog(ANALOG_LEFT_X);
-		int turn = controller.get_analog(ANALOG_LEFT_Y);
+		int forward = controller.get_analog(ANALOG_LEFT_Y);
+		int turn = controller.get_analog(ANALOG_LEFT_X);
 
 		if (forward+turn!=0){
 			driveMotors.set_brake_modes(pros::E_MOTOR_BRAKE_COAST);
@@ -292,9 +319,8 @@ void opcontrol() {
 			speedMod = 1; // Speed at 100%
 		}
 
-		
-		double leftV = -(forward + turn)*speedMod;
-		double rightV = -(forward - turn)*speedMod;
+		double leftV = (forward + turn)*speedMod;
+		double rightV = (forward - turn)*speedMod;
 		
 		std::vector<double> dTemps = driveMotors.get_temperatures();
 		double averageDriveTemps = std::reduce(dTemps.begin(),dTemps.end(),0.0)/dTemps.size();
@@ -313,11 +339,11 @@ void opcontrol() {
 		if (averageSlingTemps<55){
 			//slingshot
 			if (controller.get_digital(DIGITAL_R1)==true){
-				slingShotMotors.move(127);
+				slingShotMotors.move(-127);
 			}
 			//intake
 			if (controller.get_digital(DIGITAL_A)==true){
-				slingShotMotors.move(-127);
+				slingShotMotors.move(127);
 			}
 		}
 		else{
@@ -340,6 +366,10 @@ void opcontrol() {
 		if (controller.get_digital(DIGITAL_DOWN)==true){
 			piston1.set_value(true);
 			piston2.set_value(true);
+		}
+		if (controller.get_digital(DIGITAL_LEFT)==true){
+			leftSide.move(127);
+			rightSide.move(127);
 		}
 		pros::delay(20);
 	}

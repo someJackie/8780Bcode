@@ -8,6 +8,9 @@ extern pros::Motor rightUp;
 extern pros::Motor rightMiddle;
 extern pros::Motor rightDown;
 
+extern pros::Motor_Group GleftUp;
+extern pros::Motor_Group GrightUp;
+
 extern pros::Motor_Group leftSide;
 extern pros::Motor_Group rightSide;
 extern pros::Motor_Group driveMotors;

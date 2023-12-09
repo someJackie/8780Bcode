@@ -16,6 +16,7 @@ void timeStop(double tiempo){
 void driveE(double speed, double distance){
     //speed = speed percentage 
     //distance = distance in inches
+    pros::lcd::set_text(1, "driveE");
     double degree =(distance/wheelCir)*360*gearRatio;
     double rpm = 2*speed;
     if (speed>100 || speed<0){
@@ -23,7 +24,7 @@ void driveE(double speed, double distance){
     }
     driveMotors.move_relative(degree,rpm);
 
-    while (!(rightDown.get_position() > degree-5)){
+    while (!((rightDown.get_position() < degree+5) && (rightDown.get_position() > degree-5))){
         pros::delay(2);
     }
     timeStop(20);
